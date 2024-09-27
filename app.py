@@ -1,15 +1,17 @@
+import torch
 import gradio as gr
 from transformers import BlipProcessor, BlipForConditionalGeneration
 from PIL import Image
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-large")
-model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-large").to("cuda")
+model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-large").to(device)
 
 def generate_caption(image):
     # Now directly using the PIL Image object
-    inputs = processor(images=image, return_tensors="pt").to("cuda")
+    inputs = processor(images=image, return_tensors="pt")
     outputs = model.generate(**inputs)
-    caption = processor.decode(outputs[0], skip_special_tokens=True)
+    caption = processor.decode(outputs[0], skip_special_tokens=True, clean_up_tokenization_spaces=True)
     return caption
 
 def caption_image(image):
